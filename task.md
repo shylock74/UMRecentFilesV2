@@ -16,9 +16,9 @@
   - [✅] Implementazione UMRecentFilesView.swift (pannello collassabile retrocompatibile con transizioni, layout switch e stati vuoti con UMUIEmptyStateView)
   - [✅] Implementazione UMOpenRecentPanelView.swift e wrapper AppKit UMOpenRecent / UMOpenRecentVC
   - [✅] Implementazione UMRecentFilesMenu.swift (supporto menu SwiftUI e AppKit)
-- [ ] Milestone 4: Typealias, Retrocompatibilità e Documentazione
-  - [ ] Esportazione typealias e metodi helper in UMRecentFilesV2.swift
-  - [ ] Aggiornamento README.md e creazione/aggiornamento WalkThrough.md
+- [✅] Milestone 4: Typealias, Retrocompatibilità e Documentazione
+  - [✅] Esportazione typealias e metodi helper in UMRecentFilesV2.swift
+  - [✅] Aggiornamento README.md e creazione/aggiornamento WalkThrough.md
 - [ ] Milestone 5: Previews, Testing e Verifica Finale
   - [ ] Implementazione UMRecentFilesShowcase.swift con mock data realistici e preview interattive
   - [ ] Scrittura ed esecuzione unit tests in UMRecentFilesV2Tests

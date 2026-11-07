@@ -1,21 +1,48 @@
 //
-// UMRecentFilesV2.swift
-// UMRecentFilesV2
+//  UMRecentFilesV2.swift
+//  UMRecentFilesV2
 //
-// Created by Alex Raccuglia on 7 Nov 2026.
+//  Created by Alex Raccuglia on 07/11/2026.
 //
 
 import Foundation
-import UMUIControls
+import SwiftUI
+import AppKit
 
+// Re-export UMUIControls so callers have seamless access to UMUITheme, buttons and fields
+@_exported import UMUIControls
+
+/// Root module helper for UMRecentFilesV2.
 public struct UMRecentFilesV2 {
-	public var text : String = "Hello from UMRecentFilesV2!"
 
-	public init () {
-		// Public initializer
+	public static let version = "2.0.0"
+
+	public init() {}
+
+	/// Opens a recent file at the given URL using the standard system handler.
+	public static func openFile(_ url: URL) {
+		NSWorkspace.shared.open(url)
 	}
 
-	public func greeting () -> String {
-		return text
+	/// Opens the modern SwiftUI "Open Recent" window.
+	public static func showOpenRecentWindow(
+		image: NSImage? = nil,
+		removeExtension: Bool = true,
+		createNewCallback: (() -> Void)? = nil,
+		selectedFileCallback: ((URL) -> Void)? = nil,
+		deleteFileCallback: ((URL) -> Void)? = nil
+	) {
+		UMOpenRecent.showWindow(
+			image: image,
+			removeExtension: removeExtension,
+			createNewCallback: createNewCallback,
+			selectedFileCallback: selectedFileCallback,
+			deleteFileCallback: deleteFileCallback
+		)
 	}
 }
+
+// MARK: - Backward Compatibility Typealiases
+public typealias UMRecentFilesV2Manager = UMRecentFiles
+public typealias UMRecentFilesV2Item = UMRecentFile
+public typealias UMRecentFilesV2View = UMRecentFilesView
