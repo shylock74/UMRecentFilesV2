@@ -15,7 +15,7 @@ import AppKit
 /// Root module helper for UMRecentFilesV2.
 public struct UMRecentFilesV2 {
 
-	public static let version = "2.0.0"
+	public static let version = "2.0.1"
 
 	public init() {}
 

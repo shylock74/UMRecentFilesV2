@@ -188,6 +188,20 @@ public struct UMRecentFilesView: View {
 					} else {
 						contentScrollView(items: currentItems, isDiscovered: selectedTab == 1)
 					}
+
+					// Bottom small summary footer when finished searching on disk
+					if selectedTab == 1 && !searchCoordinator.isSearching && !searchCoordinator.discoveredFiles.isEmpty {
+						HStack {
+							Image(systemName: "internaldrive")
+								.font(.system(size: 8))
+							Text("\(displayedDiscoveredFiles.count) of \(searchCoordinator.discoveredFiles.count) files found on disk")
+								.font(.system(size: 9))
+							Spacer()
+						}
+						.foregroundColor(theme.textTertiary)
+						.padding(.horizontal, 10)
+						.padding(.top, 2)
+					}
 				}
 				.padding(.bottom, 6)
 				.transition(.opacity)

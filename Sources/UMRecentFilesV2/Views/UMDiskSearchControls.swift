@@ -113,6 +113,16 @@ public struct UMSearchProgressPill: View {
 				.foregroundColor(theme.textSecondary)
 				.lineLimit(1)
 
+			if !searchCoordinator.isSearching && !searchCoordinator.discoveredFiles.isEmpty {
+				Text("(\(searchCoordinator.discoveredFiles.count) files)")
+					.font(.system(size: 9, weight: .semibold, design: .monospaced))
+					.foregroundColor(theme.accentText)
+					.padding(.horizontal, 4)
+					.padding(.vertical, 1)
+					.background(theme.surfaceControl)
+					.clipShape(Capsule())
+			}
+
 			Spacer(minLength: 4)
 
 			if searchCoordinator.isSearching {

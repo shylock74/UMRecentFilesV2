@@ -273,6 +273,20 @@ public struct UMOpenRecentPanelView: View {
 						}
 					}
 				}
+
+				// Small summary footer when finished searching on disk
+				if selectedTab == 1 && !searchCoordinator.isSearching && !searchCoordinator.discoveredFiles.isEmpty {
+					HStack {
+						Image(systemName: "internaldrive")
+							.font(.system(size: 9))
+						Text("\(displayedDiscoveredFiles.count) files found on disk")
+							.font(.system(size: 10))
+						Spacer()
+					}
+					.foregroundColor(theme.textTertiary)
+					.padding(.horizontal, 14)
+					.padding(.bottom, 4)
+				}
 			}
 			.frame(minWidth: 420, maxWidth: .infinity)
 			.background(theme.surfaceWindow)
