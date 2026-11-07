@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "umuicontrols",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/shylock74/UMUIControls",
+      "state" : {
+        "branch" : "main",
+        "revision" : "95942a78dfe4cae8444b029dcbbb84b2a6749781"
+      }
+    }
+  ],
+  "version" : 2
+}
