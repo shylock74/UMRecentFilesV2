@@ -31,7 +31,14 @@ public final class UMFileSearchCoordinator: ObservableObject, @unchecked Sendabl
 	public init() {}
 
 	deinit {
-		stopSearch()
+		if let query = metadataQuery {
+			query.stop()
+			query.disableUpdates()
+			NotificationCenter.default.removeObserver(self, name: .NSMetadataQueryDidUpdate, object: query)
+			NotificationCenter.default.removeObserver(self, name: .NSMetadataQueryDidFinishGathering, object: query)
+		}
+		searchWorkItem?.cancel()
+		flushTimer?.invalidate()
 	}
 
 	// MARK: - Public Search Controls

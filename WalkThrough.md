@@ -13,9 +13,12 @@ Il package è strutturato in modo modulare senza dipendere dal monolite `UMOmnia
 - **`UMRecentFiles`**: Il manager principale (`ObservableObject`). Supporta modalità ibrida (`UserDefaults` + `NSDocumentController.shared`), conteggio massimo configurabile (`maxCount`), pin/preferiti, filtri e ordinamento.
 - **`UMRecentThumbnailLoader`**: Caricatore asincrono di anteprime basato su `QLThumbnailGenerator` con `NSCache` e fallback ad alta fedeltà sull'icona di sistema del file.
 - **`UMRecentFileHelpers`**: Funzioni di supporto pure per formattazione dimensioni byte, date relative/compatte, verifica esistenza disco, Security-Scoped Bookmarks e reveal nel Finder.
+- **`UMAppDocumentTypes`**: Analizza `Info.plist` (`CFBundleDocumentTypes`) per determinare a runtime i formati supportati dall'app.
+- **`UMFileSearchCoordinator`**: Coordina le ricerche globali Spotlight e le scansioni ricorsive di cartelle con streaming reattivo a lotti.
 
 ### 2. `Views/`
-- **`UMRecentFilesView`**: Container collassabile SwiftUI con animazione spring, persistenza dello stato aperto/chiuso con `@AppStorage`, conteggio file, supporto drag-and-drop e stati vuoti con `UMUIEmptyStateView`.
+- **`UMRecentFilesView`**: Container collassabile SwiftUI con animazione spring, persistenza dello stato aperto/chiuso con `@AppStorage`, conteggio file, supporto drag-and-drop, tab "On Disk" e stati vuoti con `UMUIEmptyStateView`.
+- **`UMDiskSearchControls`**: Micro-pulsante per avviare la ricerca (Spotlight o cartella specifica) e pillola di avanzamento con spinner e pulsante di stop.
 - **`UMRecentFilesHeaderView`**: Header con titolo, icona, badge conteggio, pulsante switch lista/griglia e menu di ordinamento a tendina.
 - **`UMRecentFilesFilterBar`**: Barra di ricerca integrata con `UMUITextField` e pillole filtraggio per estensione.
 - **`UMRecentFileRowView`**: Riga per la modalità elenco con icona/anteprima QuickLook, indicatore Pin, percorso abbreviato, data, dimensione, pulsanti di azione rapida su hover (Pin, Finder, Rimuovi) e context menu completo.

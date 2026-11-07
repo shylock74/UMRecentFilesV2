@@ -53,6 +53,7 @@ public struct UMRecentFilesShowcaseView: View {
 					UMOpenRecentPanelView(
 						heroTitle: "Ulti.Media Studio",
 						heroSubtitle: "Version 2.0 (Build 42)",
+						filterExtensions: ["mp4", "wav", "fcpxml", "pdf"],
 						manager: mockManager,
 						createNewCallback: {
 							print("Create new document")

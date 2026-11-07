@@ -125,4 +125,41 @@ final class UMRecentFilesV2Tests: XCTestCase {
 		XCTAssertEqual(searchResults.count, 1)
 		XCTAssertEqual(searchResults.first?.url, audioURL)
 	}
+
+	func testAppDocumentTypesResolution() {
+		// Explicit extensions override
+		let explicit = ["mov", "mp4"]
+		let resolved = UMAppDocumentTypes.resolveExtensions(explicitExtensions: explicit)
+		XCTAssertEqual(resolved, ["mov", "mp4"])
+
+		// Fallback from recent files when explicit is empty
+		let testFile = UMRecentFile(url: URL(fileURLWithPath: "/tmp/sample.fcpxml"))
+		let fallback = UMAppDocumentTypes.resolveExtensions(explicitExtensions: [], fallbackFromFiles: [testFile])
+		XCTAssertTrue(fallback.contains("fcpxml"))
+	}
+
+	func testFileSearchCoordinatorFolderScan() {
+		let coordinator = UMFileSearchCoordinator()
+
+		// Create files in temp directory
+		let fileA = tempDirectory.appendingPathComponent("ProjectA.testext")
+		let fileB = tempDirectory.appendingPathComponent("ProjectB.testext")
+		let fileC = tempDirectory.appendingPathComponent("IgnoreMe.other")
+
+		FileManager.default.createFile(atPath: fileA.path, contents: Data())
+		FileManager.default.createFile(atPath: fileB.path, contents: Data())
+		FileManager.default.createFile(atPath: fileC.path, contents: Data())
+
+		let expectation = XCTestExpectation(description: "Folder search completes")
+
+		coordinator.searchInFolder(folderURL: tempDirectory, extensions: ["testext"], limit: 10)
+
+		DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+			XCTAssertEqual(coordinator.discoveredFiles.count, 2)
+			XCTAssertFalse(coordinator.isSearching)
+			expectation.fulfill()
+		}
+
+		wait(for: [expectation], timeout: 2.0)
+	}
 }
