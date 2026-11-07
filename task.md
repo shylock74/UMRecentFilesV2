@@ -1,26 +1,17 @@
-# Task List - UMRecentFilesV2
+# Task List - UMRecentFilesV2: Disk Search Feature
 
-- [✅] Milestone 1: Configurazione Package e Target macOS
-  - [✅] Aggiornamento Package.swift con supporto macOS (.v12) e dipendenze
-  - [✅] Verifica compilazione iniziale con `swift build`
-- [✅] Milestone 2: Core Data Layer e Helpers
-  - [✅] Implementazione UMRecentFileHelpers.swift (formattazione dimensioni, date, string search, Finder reveal, security bookmarks)
-  - [✅] Implementazione UMRecentFile.swift (modello Codable/Identifiable/Sendable con decodifica retrocompatibile)
-  - [✅] Implementazione UMRecentFilesConfiguration.swift (opzioni sorgente dati, ordinamento, filtri)
-  - [✅] Implementazione UMRecentFiles.swift (manager ibrido UserDefaults + NSDocumentController, gestione Pin, rimozione, fillRecentFilesMenu)
-  - [✅] Implementazione UMRecentThumbnailLoader.swift (anteprime QuickLook asincrone con NSCache e fallback a NSWorkspace icon)
-- [✅] Milestone 3: Componenti UI SwiftUI con UMUIControls
-  - [✅] Implementazione UMRecentFilesHeaderView.swift e UMRecentFilesFilterBar.swift (ricerca con UMUITextField, pillole filtri)
-  - [✅] Implementazione UMRecentFileRowView.swift (riga lista con QuickLook icon, metadati, hover action buttons, context menu, drag & drop)
-  - [✅] Implementazione UMRecentFileCardView.swift (layout a griglia con card e preview grafica)
-  - [✅] Implementazione UMRecentFilesView.swift (pannello collassabile retrocompatibile con transizioni, layout switch e stati vuoti con UMUIEmptyStateView)
-  - [✅] Implementazione UMOpenRecentPanelView.swift e wrapper AppKit UMOpenRecent / UMOpenRecentVC
-  - [✅] Implementazione UMRecentFilesMenu.swift (supporto menu SwiftUI e AppKit)
-- [✅] Milestone 4: Typealias, Retrocompatibilità e Documentazione
-  - [✅] Esportazione typealias e metodi helper in UMRecentFilesV2.swift
-  - [✅] Aggiornamento README.md e creazione/aggiornamento WalkThrough.md
-- [✅] Milestone 5: Previews, Testing e Verifica Finale
-  - [✅] Implementazione UMRecentFilesShowcase.swift con mock data realistici e preview interattive
-  - [✅] Scrittura ed esecuzione unit tests in UMRecentFilesV2Tests
-  - [✅] Verifica build e test completi (`swift test`)
-
+- [✅] Milestone 6: Rilevamento Tipi e Motore di Ricerca Asincrono su Disco
+  - [✅] Implementazione UMAppDocumentTypes.swift (rilevamento automatico estensioni e UTType da Info.plist e fallback)
+  - [✅] Implementazione UMFileSearchCoordinator.swift (motore ibrido NSMetadataQuery per Spotlight + DirectoryEnumerator ricorsivo, streaming debounced con batching, cancellazione e controllo stato)
+  - [✅] Test di compilazione del Core di ricerca
+- [ ] Milestone 7: Componenti Grafici per la Ricerca su Disco (SwiftUI & UMUIControls)
+  - [ ] Implementazione UMDiskSearchControls.swift (pulsante di avvio, menu di selezione cartella, pillola di stato animata e pulsante Stop)
+  - [ ] Integrazione in UMRecentFilesView.swift (sezione o tab "Discovered on Disk", streaming progressivo, gestione tap per apertura e registrazione automatica nei recenti)
+  - [ ] Integrazione in UMOpenRecentPanelView.swift (pulsante "Find on Disk...", visualizzazione e gestione file scoperti)
+  - [ ] Verifica build di tutti i componenti UI
+- [ ] Milestone 8: Previews, Testing, Documentazione e Push
+  - [ ] Aggiornamento UMRecentFilesShowcase.swift con simulatore interattivo di ricerca su disco
+  - [ ] Aggiunta di unit test in UMRecentFilesV2Tests per il rilevamento tipi e il coordinatore di ricerca
+  - [ ] Esecuzione completa di `swift test`
+  - [ ] Aggiornamento di README.md, WalkThrough.md e task.md
+  - [ ] Commit e Push su main
