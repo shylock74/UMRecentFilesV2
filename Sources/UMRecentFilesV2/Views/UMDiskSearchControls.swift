@@ -142,3 +142,4 @@ public struct UMSearchProgressPill: View {
 		.clipShape(RoundedRectangle(cornerRadius: 12))
 	}
 }
+
