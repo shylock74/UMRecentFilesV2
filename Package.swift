@@ -3,35 +3,30 @@
 
 import PackageDescription
 
-let package = Package (
+let package = Package(
 	name: "UMRecentFilesV2",
 	platforms: [
-		.macOS ( .v27 ),
-		.iOS ( .v27 )
+		.macOS(.v12)
 	],
 	products: [
-		// Products define the executables and libraries a package produces, making them visible to other packages.
-		.library (
+		.library(
 			name: "UMRecentFilesV2",
-			targets: [ "UMRecentFilesV2" ]
+			targets: ["UMRecentFilesV2"]
 		),
 	],
 	dependencies: [
-		// Dependencies declare other packages that this package depends on.
-		.package ( url: "https://github.com/shylock74/UMUIControls", branch: "main" ),
+		.package(url: "https://github.com/shylock74/UMUIControls", branch: "main"),
 	],
 	targets: [
-		// Targets are the basic building blocks of a package, defining a module or a test suite.
-		// Targets can depend on other targets in this package and products from dependencies.
-		.target (
+		.target(
 			name: "UMRecentFilesV2",
 			dependencies: [
-				.product ( name: "UMUIControls", package: "UMUIControls" )
+				.product(name: "UMUIControls", package: "UMUIControls")
 			]
 		),
-		.testTarget (
+		.testTarget(
 			name: "UMRecentFilesV2Tests",
-			dependencies: [ "UMRecentFilesV2" ]
+			dependencies: ["UMRecentFilesV2"]
 		),
 	]
 )
