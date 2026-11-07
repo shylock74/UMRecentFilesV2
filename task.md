@@ -19,8 +19,8 @@
 - [✅] Milestone 4: Typealias, Retrocompatibilità e Documentazione
   - [✅] Esportazione typealias e metodi helper in UMRecentFilesV2.swift
   - [✅] Aggiornamento README.md e creazione/aggiornamento WalkThrough.md
-- [ ] Milestone 5: Previews, Testing e Verifica Finale
-  - [ ] Implementazione UMRecentFilesShowcase.swift con mock data realistici e preview interattive
-  - [ ] Scrittura ed esecuzione unit tests in UMRecentFilesV2Tests
-  - [ ] Verifica build e test completi (`swift test`)
+- [✅] Milestone 5: Previews, Testing e Verifica Finale
+  - [✅] Implementazione UMRecentFilesShowcase.swift con mock data realistici e preview interattive
+  - [✅] Scrittura ed esecuzione unit tests in UMRecentFilesV2Tests
+  - [✅] Verifica build e test completi (`swift test`)
 
