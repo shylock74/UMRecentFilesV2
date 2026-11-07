@@ -3,12 +3,12 @@
 - [✅] Milestone 1: Configurazione Package e Target macOS
   - [✅] Aggiornamento Package.swift con supporto macOS (.v12) e dipendenze
   - [✅] Verifica compilazione iniziale con `swift build`
-- [ ] Milestone 2: Core Data Layer e Helpers
-  - [ ] Implementazione UMRecentFileHelpers.swift (formattazione dimensioni, date, string search, Finder reveal, security bookmarks)
-  - [ ] Implementazione UMRecentFile.swift (modello Codable/Identifiable/Sendable con decodifica retrocompatibile)
-  - [ ] Implementazione UMRecentFilesConfiguration.swift (opzioni sorgente dati, ordinamento, filtri)
-  - [ ] Implementazione UMRecentFiles.swift (manager ibrido UserDefaults + NSDocumentController, gestione Pin, rimozione, fillRecentFilesMenu)
-  - [ ] Implementazione UMRecentThumbnailLoader.swift (anteprime QuickLook asincrone con NSCache e fallback a NSWorkspace icon)
+- [✅] Milestone 2: Core Data Layer e Helpers
+  - [✅] Implementazione UMRecentFileHelpers.swift (formattazione dimensioni, date, string search, Finder reveal, security bookmarks)
+  - [✅] Implementazione UMRecentFile.swift (modello Codable/Identifiable/Sendable con decodifica retrocompatibile)
+  - [✅] Implementazione UMRecentFilesConfiguration.swift (opzioni sorgente dati, ordinamento, filtri)
+  - [✅] Implementazione UMRecentFiles.swift (manager ibrido UserDefaults + NSDocumentController, gestione Pin, rimozione, fillRecentFilesMenu)
+  - [✅] Implementazione UMRecentThumbnailLoader.swift (anteprime QuickLook asincrone con NSCache e fallback a NSWorkspace icon)
 - [ ] Milestone 3: Componenti UI SwiftUI con UMUIControls
   - [ ] Implementazione UMRecentFilesHeaderView.swift e UMRecentFilesFilterBar.swift (ricerca con UMUITextField, pillole filtri)
   - [ ] Implementazione UMRecentFileRowView.swift (riga lista con QuickLook icon, metadati, hover action buttons, context menu, drag & drop)
