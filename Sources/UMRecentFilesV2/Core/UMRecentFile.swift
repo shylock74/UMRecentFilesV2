@@ -131,3 +131,4 @@ public class UMRecentFile: Codable, Identifiable, Hashable, Equatable, @unchecke
 		hasher.combine(url)
 	}
 }
+

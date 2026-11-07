@@ -79,3 +79,4 @@ public struct UMRecentFilesMenu: View {
 		}
 	}
 }
+

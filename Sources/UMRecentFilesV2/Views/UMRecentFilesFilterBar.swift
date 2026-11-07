@@ -85,3 +85,4 @@ public struct UMRecentFilesFilterBar: View {
 		.buttonStyle(.plain)
 	}
 }
+

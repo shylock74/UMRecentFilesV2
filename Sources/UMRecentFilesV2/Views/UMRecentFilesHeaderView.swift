@@ -146,3 +146,4 @@ public struct UMRecentFilesHeaderView: View {
 		.background(theme.surfacePanel.opacity(0.8))
 	}
 }
+

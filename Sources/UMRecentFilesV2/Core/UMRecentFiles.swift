@@ -332,3 +332,4 @@ public class UMRecentFiles: ObservableObject, Codable, @unchecked Sendable {
 		}
 	}
 }
+

@@ -52,3 +52,4 @@ Il package è strutturato in modo modulare senza dipendere dal monolite `UMOmnia
    }
    ```
    ma ora beneficia automaticamente del restyling con `UMUIControls`, delle miniature QuickLook, del toggle lista/griglia e dei filtri.
+

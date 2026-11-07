@@ -50,3 +50,4 @@ public enum UMRecentFilesViewLayout: String, Codable, CaseIterable, Sendable {
 		}
 	}
 }
+
