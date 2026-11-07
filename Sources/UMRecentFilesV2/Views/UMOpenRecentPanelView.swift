@@ -24,7 +24,10 @@ public struct UMOpenRecentPanelView: View {
 	public let onCancel: (() -> Void)?
 
 	@ObservedObject public var manager: UMRecentFiles
+	@StateObject private var searchCoordinator = UMFileSearchCoordinator()
 
+	public let filterExtensions: [String]
+	@State private var selectedTab: Int = 0 // 0 = Recent, 1 = On Disk
 	@State private var searchText: String = ""
 	@State private var selectedExtension: String? = nil
 	@State private var layout: UMRecentFilesViewLayout = .list
@@ -37,6 +40,7 @@ public struct UMOpenRecentPanelView: View {
 		heroTitle: String = "Open Recent",
 		heroSubtitle: String? = nil,
 		removeExtension: Bool = true,
+		filterExtensions: [String] = [],
 		manager: UMRecentFiles = UMRecentFiles.shared,
 		createNewCallback: (() -> Void)? = nil,
 		selectedFileCallback: ((URL) -> Void)? = nil,
@@ -47,6 +51,7 @@ public struct UMOpenRecentPanelView: View {
 		self.heroTitle = heroTitle
 		self.heroSubtitle = heroSubtitle
 		self.removeExtension = removeExtension
+		self.filterExtensions = filterExtensions
 		self.manager = manager
 		self.createNewCallback = createNewCallback
 		self.selectedFileCallback = selectedFileCallback
@@ -54,7 +59,14 @@ public struct UMOpenRecentPanelView: View {
 		self.onCancel = onCancel
 	}
 
-	private var displayedFiles: [UMRecentFile] {
+	private var activeExtensions: [String] {
+		UMAppDocumentTypes.resolveExtensions(
+			explicitExtensions: filterExtensions,
+			fallbackFromFiles: manager.fileList
+		)
+	}
+
+	private var displayedRecentFiles: [UMRecentFile] {
 		var exts: [String] = []
 		if let ext = selectedExtension {
 			exts = [ext]
@@ -65,6 +77,23 @@ public struct UMOpenRecentPanelView: View {
 			sortOrder: sortOrder,
 			hideMissingFiles: false
 		)
+	}
+
+	private var displayedDiscoveredFiles: [UMRecentFile] {
+		var list = searchCoordinator.discoveredFiles
+
+		if let ext = selectedExtension {
+			list = list.filter { $0.fileExtension == ext.lowercased() }
+		}
+
+		if !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+			list = list.filter {
+				UMRecentFileHelpers.searchContains(source: $0.name, query: searchText) ||
+				UMRecentFileHelpers.searchContains(source: $0.url.path, query: searchText)
+			}
+		}
+
+		return list
 	}
 
 	public var body: some View {
@@ -113,6 +142,12 @@ public struct UMOpenRecentPanelView: View {
 						}
 					}
 
+					// Find on Disk Action Button
+					UMUICapsuleButton(searchCoordinator.isSearching ? "Searching..." : "Find on Disk", style: .gray, size: .normal) {
+						searchCoordinator.startSystemWideSearch(extensions: activeExtensions)
+						selectedTab = 1
+					}
+
 					if let cancel = onCancel {
 						Button("Cancel") {
 							cancel()
@@ -136,10 +171,15 @@ public struct UMOpenRecentPanelView: View {
 				// Top search and controls
 				HStack(spacing: 8) {
 					UMUITextField(
-						placeholder: "Search recent files...",
+						placeholder: "Search files...",
 						value: $searchText,
 						size: .small,
 						isClearable: true
+					)
+
+					UMDiskSearchButton(
+						searchCoordinator: searchCoordinator,
+						extensionsToSearch: activeExtensions
 					)
 
 					Button {
@@ -157,27 +197,51 @@ public struct UMOpenRecentPanelView: View {
 				.padding(.horizontal, 14)
 				.padding(.top, 14)
 
+				// Search Progress Pill (if searching or found)
+				if searchCoordinator.isSearching || !searchCoordinator.discoveredFiles.isEmpty {
+					UMSearchProgressPill(searchCoordinator: searchCoordinator)
+						.padding(.horizontal, 14)
+				}
+
+				// Mode Selector Tabs (when disk search is active or has results)
+				if !searchCoordinator.discoveredFiles.isEmpty || searchCoordinator.isSearching {
+					HStack(spacing: 0) {
+						tabButton(title: "Recent (\(displayedRecentFiles.count))", index: 0)
+						tabButton(title: "On Disk (\(displayedDiscoveredFiles.count))", index: 1)
+					}
+					.padding(.horizontal, 14)
+				}
+
+				let currentItems = (selectedTab == 1) ? displayedDiscoveredFiles : displayedRecentFiles
+
 				// Files List / Grid Area
-				if displayedFiles.isEmpty {
+				if currentItems.isEmpty {
 					UMUIEmptyStateView(
-						systemImage: "clock.badge.questionmark",
-						title: "No Recent Files Found",
-						message: searchText.isEmpty ? "No recent items in history." : "No files matching \"\(searchText)\"."
+						systemImage: selectedTab == 1 ? "internaldrive" : "clock.badge.questionmark",
+						title: selectedTab == 1 ? "No Compatible Files Found" : "No Recent Files Found",
+						message: selectedTab == 1 ? "Use 'Find on Disk' or choose a folder to discover documents." : (searchText.isEmpty ? "No recent items in history." : "No files matching \"\(searchText)\".")
 					)
 				} else {
 					ScrollView {
 						if layout == .list {
 							LazyVStack(spacing: 2) {
-								ForEach(displayedFiles) { file in
+								ForEach(currentItems) { file in
 									UMRecentFileRowView(
 										file: file,
 										removeExtension: removeExtension,
 										showThumbnail: true,
-										onSelect: { url in selectedFileCallback?(url) },
+										onSelect: { url in
+											manager.addFile(url: url)
+											selectedFileCallback?(url)
+										},
 										onTogglePin: { manager.togglePin($0) },
 										onRemove: { file in
-											deleteFileCallback?(file.url)
-											manager.removeRecentFile(file)
+											if selectedTab == 1 {
+												searchCoordinator.removeDiscoveredFile(file)
+											} else {
+												deleteFileCallback?(file.url)
+												manager.removeRecentFile(file)
+											}
 										}
 									)
 								}
@@ -185,15 +249,22 @@ public struct UMOpenRecentPanelView: View {
 							.padding(.horizontal, 12)
 						} else {
 							LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: 8)], spacing: 8) {
-								ForEach(displayedFiles) { file in
+								ForEach(currentItems) { file in
 									UMRecentFileCardView(
 										file: file,
 										removeExtension: removeExtension,
-										onSelect: { url in selectedFileCallback?(url) },
+										onSelect: { url in
+											manager.addFile(url: url)
+											selectedFileCallback?(url)
+										},
 										onTogglePin: { manager.togglePin($0) },
 										onRemove: { file in
-											deleteFileCallback?(file.url)
-											manager.removeRecentFile(file)
+											if selectedTab == 1 {
+												searchCoordinator.removeDiscoveredFile(file)
+											} else {
+												deleteFileCallback?(file.url)
+												manager.removeRecentFile(file)
+											}
 										}
 									)
 								}
@@ -207,6 +278,26 @@ public struct UMOpenRecentPanelView: View {
 			.background(theme.surfaceWindow)
 		}
 		.frame(width: 680, height: 420)
+	}
+
+	@ViewBuilder
+	private func tabButton(title: String, index: Int) -> some View {
+		Button {
+			withAnimation(.easeInOut(duration: 0.15)) {
+				selectedTab = index
+			}
+		} label: {
+			Text(title)
+				.font(.system(size: 11, weight: selectedTab == index ? .bold : .medium))
+				.foregroundColor(selectedTab == index ? theme.textPrimary : theme.textTertiary)
+				.padding(.vertical, 4)
+				.frame(maxWidth: .infinity)
+				.background(
+					selectedTab == index ? theme.surfaceControl : Color.clear
+				)
+				.clipShape(RoundedRectangle(cornerRadius: 6))
+		}
+		.buttonStyle(.plain)
 	}
 }
 

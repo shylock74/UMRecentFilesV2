@@ -16,6 +16,7 @@ public struct UMRecentFilesView: View {
 
 	// MARK: - Manager & Configuration
 	@ObservedObject public var manager: UMRecentFiles
+	@StateObject private var searchCoordinator = UMFileSearchCoordinator()
 
 	public var title: String
 	public var filterExtensions: [String]
@@ -31,6 +32,7 @@ public struct UMRecentFilesView: View {
 	@AppStorage("UMRecentFiles.layout") private var layoutRaw: String = UMRecentFilesViewLayout.list.rawValue
 	@AppStorage("UMRecentFiles.sortOrder") private var sortOrderRaw: String = UMRecentFilesSortOrder.lastOpened.rawValue
 
+	@State private var selectedTab: Int = 0 // 0 = Recent, 1 = On Disk
 	@State private var searchText: String = ""
 	@State private var selectedExtension: String? = nil
 	@State private var isTargetedForDrop: Bool = false
@@ -89,15 +91,13 @@ public struct UMRecentFilesView: View {
 	}
 
 	private var activeExtensions: [String] {
-		if !filterExtensions.isEmpty {
-			return filterExtensions
-		}
-		// Discover distinct extensions in the current list
-		let allExts = Set(manager.fileList.map { $0.fileExtension }.filter { !$0.isEmpty })
-		return Array(allExts).sorted()
+		UMAppDocumentTypes.resolveExtensions(
+			explicitExtensions: filterExtensions,
+			fallbackFromFiles: manager.fileList
+		)
 	}
 
-	private var displayedFiles: [UMRecentFile] {
+	private var displayedRecentFiles: [UMRecentFile] {
 		var extensionsToFilter = filterExtensions
 		if let selectedExt = selectedExtension {
 			extensionsToFilter = [selectedExt]
@@ -111,6 +111,23 @@ public struct UMRecentFilesView: View {
 		)
 	}
 
+	private var displayedDiscoveredFiles: [UMRecentFile] {
+		var list = searchCoordinator.discoveredFiles
+
+		if let selectedExt = selectedExtension {
+			list = list.filter { $0.fileExtension == selectedExt.lowercased() }
+		}
+
+		if !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+			list = list.filter {
+				UMRecentFileHelpers.searchContains(source: $0.name, query: searchText) ||
+				UMRecentFileHelpers.searchContains(source: $0.url.path, query: searchText)
+			}
+		}
+
+		return list
+	}
+
 	// MARK: - View Body
 	public var body: some View {
 		VStack(spacing: 0) {
@@ -118,9 +135,11 @@ public struct UMRecentFilesView: View {
 			UMRecentFilesHeaderView(
 				isOpen: $isOpen,
 				title: title,
-				count: displayedFiles.count,
+				count: displayedRecentFiles.count,
 				allowLayoutSwitch: allowLayoutSwitch,
 				allowSorting: allowSorting,
+				extensionsToSearch: activeExtensions,
+				searchCoordinator: searchCoordinator,
 				layout: currentLayout,
 				sortOrder: currentSortOrder,
 				onClearRequested: {
@@ -139,16 +158,35 @@ public struct UMRecentFilesView: View {
 					)
 					.padding(.top, 6)
 
-					// Main List / Grid
-					if displayedFiles.isEmpty {
+					// Active Search Status Pill (if searching or files found)
+					if searchCoordinator.isSearching || !searchCoordinator.discoveredFiles.isEmpty {
+						UMSearchProgressPill(searchCoordinator: searchCoordinator)
+							.padding(.horizontal, 10)
+							.transition(.opacity)
+					}
+
+					// Mode Selector Tabs (when disk search has results or is searching)
+					if !searchCoordinator.discoveredFiles.isEmpty || searchCoordinator.isSearching {
+						HStack(spacing: 0) {
+							tabButton(title: "Recent (\(displayedRecentFiles.count))", index: 0)
+							tabButton(title: "On Disk (\(displayedDiscoveredFiles.count))", index: 1)
+						}
+						.padding(.horizontal, 10)
+						.padding(.top, 2)
+					}
+
+					// Main List / Grid Content
+					let currentItems = (selectedTab == 1) ? displayedDiscoveredFiles : displayedRecentFiles
+
+					if currentItems.isEmpty {
 						UMUIEmptyStateView(
-							systemImage: "doc.badge.gearshape",
-							title: "No Recent Files",
-							message: searchText.isEmpty ? "Opened documents will appear here automatically." : "No files matched \"\(searchText)\"."
+							systemImage: selectedTab == 1 ? "internaldrive" : "doc.badge.gearshape",
+							title: selectedTab == 1 ? "No Compatible Files Found" : "No Recent Files",
+							message: selectedTab == 1 ? "Search with Spotlight or choose a specific folder above." : "Opened documents will appear here automatically."
 						)
 						.frame(height: 120)
 					} else {
-						contentScrollView
+						contentScrollView(items: currentItems, isDiscovered: selectedTab == 1)
 					}
 				}
 				.padding(.bottom, 6)
@@ -167,31 +205,63 @@ public struct UMRecentFilesView: View {
 	}
 
 	@ViewBuilder
-	private var contentScrollView: some View {
+	private func tabButton(title: String, index: Int) -> some View {
+		Button {
+			withAnimation(.easeInOut(duration: 0.15)) {
+				selectedTab = index
+			}
+		} label: {
+			Text(title)
+				.font(.system(size: 11, weight: selectedTab == index ? .bold : .medium))
+				.foregroundColor(selectedTab == index ? theme.textPrimary : theme.textTertiary)
+				.padding(.vertical, 4)
+				.frame(maxWidth: .infinity)
+				.background(
+					selectedTab == index ? theme.surfaceControl : Color.clear
+				)
+				.clipShape(RoundedRectangle(cornerRadius: 6))
+		}
+		.buttonStyle(.plain)
+	}
+
+	@ViewBuilder
+	private func contentScrollView(items: [UMRecentFile], isDiscovered: Bool) -> some View {
 		ScrollView {
 			if currentLayout.wrappedValue == .list {
 				LazyVStack(spacing: 2) {
-					ForEach(displayedFiles) { file in
+					ForEach(items) { file in
 						UMRecentFileRowView(
 							file: file,
 							removeExtension: removeExtension,
 							showThumbnail: showThumbnails,
 							onSelect: handleFileSelection,
 							onTogglePin: { manager.togglePin($0) },
-							onRemove: { manager.removeRecentFile($0) }
+							onRemove: { fileToRemove in
+								if isDiscovered {
+									searchCoordinator.removeDiscoveredFile(fileToRemove)
+								} else {
+									manager.removeRecentFile(fileToRemove)
+								}
+							}
 						)
 					}
 				}
 				.padding(.horizontal, 6)
 			} else {
 				LazyVGrid(columns: [GridItem(.adaptive(minimum: 110), spacing: 6)], spacing: 6) {
-					ForEach(displayedFiles) { file in
+					ForEach(items) { file in
 						UMRecentFileCardView(
 							file: file,
 							removeExtension: removeExtension,
 							onSelect: handleFileSelection,
 							onTogglePin: { manager.togglePin($0) },
-							onRemove: { manager.removeRecentFile($0) }
+							onRemove: { fileToRemove in
+								if isDiscovered {
+									searchCoordinator.removeDiscoveredFile(fileToRemove)
+								} else {
+									manager.removeRecentFile(fileToRemove)
+								}
+							}
 						)
 					}
 				}

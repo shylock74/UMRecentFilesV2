@@ -16,6 +16,8 @@ public struct UMRecentFilesHeaderView: View {
 	public let count: Int
 	public let allowLayoutSwitch: Bool
 	public let allowSorting: Bool
+	public let extensionsToSearch: [String]
+	@ObservedObject public var searchCoordinator: UMFileSearchCoordinator
 	@Binding public var layout: UMRecentFilesViewLayout
 	@Binding public var sortOrder: UMRecentFilesSortOrder
 	public var onClearRequested: (() -> Void)?
@@ -26,6 +28,8 @@ public struct UMRecentFilesHeaderView: View {
 		count: Int,
 		allowLayoutSwitch: Bool = true,
 		allowSorting: Bool = true,
+		extensionsToSearch: [String] = [],
+		searchCoordinator: UMFileSearchCoordinator? = nil,
 		layout: Binding<UMRecentFilesViewLayout>,
 		sortOrder: Binding<UMRecentFilesSortOrder>,
 		onClearRequested: (() -> Void)? = nil
@@ -35,6 +39,8 @@ public struct UMRecentFilesHeaderView: View {
 		self.count = count
 		self.allowLayoutSwitch = allowLayoutSwitch
 		self.allowSorting = allowSorting
+		self.extensionsToSearch = extensionsToSearch
+		self.searchCoordinator = searchCoordinator ?? UMFileSearchCoordinator()
 		self._layout = layout
 		self._sortOrder = sortOrder
 		self.onClearRequested = onClearRequested
@@ -137,6 +143,12 @@ public struct UMRecentFilesHeaderView: View {
 						.frame(width: 22, height: 22)
 						.help("Sort options")
 					}
+
+					// Disk Search Button
+					UMDiskSearchButton(
+						searchCoordinator: searchCoordinator,
+						extensionsToSearch: extensionsToSearch
+					)
 				}
 				.transition(.opacity)
 			}

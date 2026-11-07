@@ -181,6 +181,12 @@ public final class UMFileSearchCoordinator: ObservableObject, @unchecked Sendabl
 		}
 	}
 
+	/// Removes a specific file from discovered results.
+	public func removeDiscoveredFile(_ file: UMRecentFile) {
+		discoveredFiles.removeAll(where: { $0.id == file.id || $0.url == file.url })
+		discoveredURLsSet.remove(file.url)
+	}
+
 	/// Clears all currently discovered items.
 	public func clearDiscovered() {
 		discoveredFiles.removeAll()
