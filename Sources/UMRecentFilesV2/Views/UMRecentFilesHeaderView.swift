@@ -16,6 +16,7 @@ public struct UMRecentFilesHeaderView: View {
 	public let count: Int
 	public let allowLayoutSwitch: Bool
 	public let allowSorting: Bool
+	public let manualURL: URL?
 	public let extensionsToSearch: [String]
 	@ObservedObject public var searchCoordinator: UMFileSearchCoordinator
 	@Binding public var layout: UMRecentFilesViewLayout
@@ -28,6 +29,7 @@ public struct UMRecentFilesHeaderView: View {
 		count: Int,
 		allowLayoutSwitch: Bool = true,
 		allowSorting: Bool = true,
+		manualURL: URL? = nil,
 		extensionsToSearch: [String] = [],
 		searchCoordinator: UMFileSearchCoordinator? = nil,
 		layout: Binding<UMRecentFilesViewLayout>,
@@ -39,6 +41,7 @@ public struct UMRecentFilesHeaderView: View {
 		self.count = count
 		self.allowLayoutSwitch = allowLayoutSwitch
 		self.allowSorting = allowSorting
+		self.manualURL = manualURL
 		self.extensionsToSearch = extensionsToSearch
 		self.searchCoordinator = searchCoordinator ?? UMFileSearchCoordinator()
 		self._layout = layout
@@ -149,6 +152,22 @@ public struct UMRecentFilesHeaderView: View {
 						searchCoordinator: searchCoordinator,
 						extensionsToSearch: extensionsToSearch
 					)
+
+					// Optional Manual Button
+					if let manual = manualURL {
+						Button {
+							NSWorkspace.shared.open(manual)
+						} label: {
+							Image(systemName: "questionmark.circle")
+								.font(.system(size: 11, weight: .medium))
+								.foregroundColor(theme.textSecondary)
+								.frame(width: 22, height: 22)
+								.background(theme.surfaceControl)
+								.clipShape(RoundedRectangle(cornerRadius: 4))
+						}
+						.buttonStyle(.plain)
+						.help("Open User Manual in browser")
+					}
 				}
 				.transition(.opacity)
 			}

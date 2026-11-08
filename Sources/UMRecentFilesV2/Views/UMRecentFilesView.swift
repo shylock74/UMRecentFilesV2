@@ -20,6 +20,7 @@ public struct UMRecentFilesView: View {
 
 	public var title: String
 	public var filterExtensions: [String]
+	public var manualURL: URL?
 	public var callback: ((URL) -> Void)?
 	public var removeExtension: Bool
 	public var showThumbnails: Bool
@@ -42,12 +43,14 @@ public struct UMRecentFilesView: View {
 	// MARK: - Initializer (Backwards Compatible with UMSwiftUI)
 	public init(
 		filterExtensions: [String] = [],
+		manualURL: URL? = nil,
 		callback: ((URL) -> Void)? = nil
 	) {
 		self.init(
 			manager: UMRecentFiles.shared,
 			title: "Recent Files",
 			filterExtensions: filterExtensions,
+			manualURL: manualURL,
 			callback: callback
 		)
 	}
@@ -57,6 +60,7 @@ public struct UMRecentFilesView: View {
 		manager: UMRecentFiles = UMRecentFiles.shared,
 		title: String = "Recent Files",
 		filterExtensions: [String] = [],
+		manualURL: URL? = nil,
 		callback: ((URL) -> Void)?,
 		removeExtension: Bool = false,
 		showThumbnails: Bool = true,
@@ -67,6 +71,7 @@ public struct UMRecentFilesView: View {
 		self.manager = manager
 		self.title = title
 		self.filterExtensions = filterExtensions
+		self.manualURL = manualURL
 		self.callback = callback
 		self.removeExtension = removeExtension
 		self.showThumbnails = showThumbnails
@@ -138,6 +143,7 @@ public struct UMRecentFilesView: View {
 				count: displayedRecentFiles.count,
 				allowLayoutSwitch: allowLayoutSwitch,
 				allowSorting: allowSorting,
+				manualURL: manualURL,
 				extensionsToSearch: activeExtensions,
 				searchCoordinator: searchCoordinator,
 				layout: currentLayout,

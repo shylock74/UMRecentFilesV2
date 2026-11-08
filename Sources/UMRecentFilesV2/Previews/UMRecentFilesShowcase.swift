@@ -37,6 +37,7 @@ public struct UMRecentFilesShowcaseView: View {
 					UMRecentFilesView(
 						manager: mockManager,
 						title: "Recent Projects",
+						manualURL: URL(string: "https://ulti.media/help"),
 						callback: { url in
 							print("Clicked mock file: \(url.lastPathComponent)")
 						}
@@ -53,6 +54,7 @@ public struct UMRecentFilesShowcaseView: View {
 					UMOpenRecentPanelView(
 						heroTitle: "Ulti.Media Studio",
 						heroSubtitle: "Version 2.0 (Build 42)",
+						manualURL: URL(string: "https://ulti.media/help"),
 						filterExtensions: ["mp4", "wav", "fcpxml", "pdf"],
 						manager: mockManager,
 						createNewCallback: {

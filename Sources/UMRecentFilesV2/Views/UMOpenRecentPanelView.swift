@@ -17,6 +17,7 @@ public struct UMOpenRecentPanelView: View {
 	public let heroImage: NSImage?
 	public let heroTitle: String
 	public let heroSubtitle: String?
+	public let manualURL: URL?
 	public let removeExtension: Bool
 	public let createNewCallback: (() -> Void)?
 	public let selectedFileCallback: ((URL) -> Void)?
@@ -39,6 +40,7 @@ public struct UMOpenRecentPanelView: View {
 		heroImage: NSImage? = nil,
 		heroTitle: String = "Open Recent",
 		heroSubtitle: String? = nil,
+		manualURL: URL? = nil,
 		removeExtension: Bool = true,
 		filterExtensions: [String] = [],
 		manager: UMRecentFiles = UMRecentFiles.shared,
@@ -50,6 +52,7 @@ public struct UMOpenRecentPanelView: View {
 		self.heroImage = heroImage
 		self.heroTitle = heroTitle
 		self.heroSubtitle = heroSubtitle
+		self.manualURL = manualURL
 		self.removeExtension = removeExtension
 		self.filterExtensions = filterExtensions
 		self.manager = manager
@@ -146,6 +149,13 @@ public struct UMOpenRecentPanelView: View {
 					UMUICapsuleButton(searchCoordinator.isSearching ? "Searching..." : "Find on Disk", style: .gray, size: .normal) {
 						searchCoordinator.startSystemWideSearch(extensions: activeExtensions)
 						selectedTab = 1
+					}
+
+					// Optional User Manual Action Button
+					if let manual = manualURL {
+						UMUICapsuleButton("User Manual", style: .gray, size: .normal) {
+							NSWorkspace.shared.open(manual)
+						}
 					}
 
 					if let cancel = onCancel {
@@ -324,6 +334,7 @@ public enum UMOpenRecent {
 	public static func showWindow(
 		image: NSImage? = nil,
 		fileIcon: NSImage? = nil,
+		manualURL: URL? = nil,
 		removeExtension: Bool = true,
 		createNewCallback: (() -> Void)? = nil,
 		selectedFileCallback: ((URL) -> Void)? = nil,
@@ -337,6 +348,7 @@ public enum UMOpenRecent {
 		let panelView = UMOpenRecentPanelView(
 			heroImage: image,
 			heroTitle: "Open Recent",
+			manualURL: manualURL,
 			removeExtension: removeExtension,
 			createNewCallback: {
 				closeWindow()
