@@ -138,6 +138,22 @@ final class UMRecentFilesV2Tests: XCTestCase {
 		XCTAssertTrue(fallback.contains("fcpxml"))
 	}
 
+	func testFileSearchCoordinatorSpotlightQuery() {
+		let coordinator = UMFileSearchCoordinator()
+		let expectation = XCTestExpectation(description: "Spotlight query completes or gathers results")
+
+		coordinator.startSystemWideSearch(extensions: ["swift"], limit: 50)
+
+		DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+			// On macOS, swift files always exist on system
+			XCTAssertGreaterThan(coordinator.discoveredFiles.count, 0)
+			coordinator.stopSearch()
+			expectation.fulfill()
+		}
+
+		wait(for: [expectation], timeout: 4.0)
+	}
+
 	func testFileSearchCoordinatorFolderScan() {
 		let coordinator = UMFileSearchCoordinator()
 

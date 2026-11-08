@@ -64,11 +64,16 @@ public final class UMFileSearchCoordinator: ObservableObject, @unchecked Sendabl
 		let query = NSMetadataQuery()
 		self.metadataQuery = query
 
-		// Build Spotlight Predicate for matching extensions
-		let subpredicates = extensions.map { ext in
-			NSPredicate(format: "%K ==[cd] %@", NSMetadataItemFSNameKey, "*.\(ext)")
+		let predicate: NSPredicate
+		if extensions.count == 1 {
+			predicate = NSPredicate(format: "%K LIKE[cd] %@", NSMetadataItemFSNameKey, "*.\(extensions[0])")
+		} else {
+			let subpredicates = extensions.map { ext in
+				NSPredicate(format: "%K LIKE[cd] %@", NSMetadataItemFSNameKey, "*.\(ext)")
+			}
+			predicate = NSCompoundPredicate(orPredicateWithSubpredicates: subpredicates)
 		}
-		query.predicate = NSCompoundPredicate(orPredicateWithSubpredicates: subpredicates)
+		query.predicate = predicate
 		query.searchScopes = [
 			NSMetadataQueryUserHomeScope,
 			NSMetadataQueryLocalComputerScope
@@ -243,7 +248,7 @@ public final class UMFileSearchCoordinator: ObservableObject, @unchecked Sendabl
 
 		for i in 0..<maxResults {
 			if let item = query.result(at: i) as? NSMetadataItem,
-			   let path = item.value(forAttribute: NSMetadataItemPathKey) as? String {
+			   let path = (item.value(forAttribute: NSMetadataItemPathKey) as? String) ?? (item.value(forAttribute: "kMDItemPath") as? String) {
 				let url = URL(fileURLWithPath: path)
 				if !self.discoveredURLsSet.contains(url) {
 					newURLs.append(url)
