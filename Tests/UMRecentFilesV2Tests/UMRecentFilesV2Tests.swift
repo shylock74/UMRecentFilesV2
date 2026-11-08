@@ -144,14 +144,20 @@ final class UMRecentFilesV2Tests: XCTestCase {
 
 		coordinator.startSystemWideSearch(extensions: ["swift"], limit: 50)
 
-		DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-			// On macOS, swift files always exist on system
-			XCTAssertGreaterThan(coordinator.discoveredFiles.count, 0)
-			coordinator.stopSearch()
-			expectation.fulfill()
+		// Poll on main runloop for discovery
+		var elapsed: TimeInterval = 0
+		let timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { t in
+			elapsed += 0.2
+			if !coordinator.discoveredFiles.isEmpty || elapsed >= 3.0 {
+				t.invalidate()
+				XCTAssertGreaterThan(coordinator.discoveredFiles.count, 0)
+				coordinator.stopSearch()
+				expectation.fulfill()
+			}
 		}
+		RunLoop.main.add(timer, forMode: .common)
 
-		wait(for: [expectation], timeout: 4.0)
+		wait(for: [expectation], timeout: 5.0)
 	}
 
 	func testFileSearchCoordinatorFolderScan() {

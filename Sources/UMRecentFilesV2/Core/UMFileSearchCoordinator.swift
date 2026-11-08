@@ -61,42 +61,53 @@ public final class UMFileSearchCoordinator: ObservableObject, @unchecked Sendabl
 		isSearching = true
 		searchStatusMessage = "Searching files with Spotlight..."
 
-		let query = NSMetadataQuery()
-		self.metadataQuery = query
+		let performStart = { [weak self] in
+			guard let self = self else { return }
 
-		let predicate: NSPredicate
-		if extensions.count == 1 {
-			predicate = NSPredicate(format: "%K LIKE[cd] %@", NSMetadataItemFSNameKey, "*.\(extensions[0])")
-		} else {
-			let subpredicates = extensions.map { ext in
-				NSPredicate(format: "%K LIKE[cd] %@", NSMetadataItemFSNameKey, "*.\(ext)")
+			let query = NSMetadataQuery()
+			self.metadataQuery = query
+			query.operationQueue = .main
+
+			let predicate: NSPredicate
+			if extensions.count == 1 {
+				predicate = NSPredicate(format: "%K LIKE[cd] %@", NSMetadataItemFSNameKey, "*.\(extensions[0])")
+			} else {
+				let subpredicates = extensions.map { ext in
+					NSPredicate(format: "%K LIKE[cd] %@", NSMetadataItemFSNameKey, "*.\(ext)")
+				}
+				predicate = NSCompoundPredicate(orPredicateWithSubpredicates: subpredicates)
 			}
-			predicate = NSCompoundPredicate(orPredicateWithSubpredicates: subpredicates)
+			query.predicate = predicate
+			query.searchScopes = [
+				NSMetadataQueryUserHomeScope,
+				NSMetadataQueryLocalComputerScope
+			]
+			query.sortDescriptors = [
+				NSSortDescriptor(key: NSMetadataItemFSContentChangeDateKey, ascending: false)
+			]
+
+			// Observe live query updates and completion on main thread
+			NotificationCenter.default.addObserver(
+				self,
+				selector: #selector(self.metadataQueryDidUpdate(_:)),
+				name: .NSMetadataQueryDidUpdate,
+				object: query
+			)
+			NotificationCenter.default.addObserver(
+				self,
+				selector: #selector(self.metadataQueryDidFinishGathering(_:)),
+				name: .NSMetadataQueryDidFinishGathering,
+				object: query
+			)
+
+			query.start()
 		}
-		query.predicate = predicate
-		query.searchScopes = [
-			NSMetadataQueryUserHomeScope,
-			NSMetadataQueryLocalComputerScope
-		]
-		query.sortDescriptors = [
-			NSSortDescriptor(key: NSMetadataItemFSContentChangeDateKey, ascending: false)
-		]
 
-		// Observe live query updates and completion
-		NotificationCenter.default.addObserver(
-			self,
-			selector: #selector(metadataQueryDidUpdate(_:)),
-			name: .NSMetadataQueryDidUpdate,
-			object: query
-		)
-		NotificationCenter.default.addObserver(
-			self,
-			selector: #selector(metadataQueryDidFinishGathering(_:)),
-			name: .NSMetadataQueryDidFinishGathering,
-			object: query
-		)
-
-		query.start()
+		if Thread.isMainThread {
+			performStart()
+		} else {
+			DispatchQueue.main.async(execute: performStart)
+		}
 	}
 
 	/// Recursively searches for matching files in a specified folder (e.g. external drives or user-chosen path).
