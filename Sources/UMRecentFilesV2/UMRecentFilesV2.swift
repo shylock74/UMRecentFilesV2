@@ -15,7 +15,7 @@ import AppKit
 /// Root module helper for UMRecentFilesV2.
 public struct UMRecentFilesV2 {
 
-	public static let version = "2.0.3"
+	public static let version = "2.0.2"
 
 	public init() {}
 
@@ -24,15 +24,9 @@ public struct UMRecentFilesV2 {
 		NSWorkspace.shared.open(url)
 	}
 
-	/// Opens the application manual or website documentation.
-	public static func openManual(url: URL) {
-		NSWorkspace.shared.open(url)
-	}
-
 	/// Opens the modern SwiftUI "Open Recent" window.
 	public static func showOpenRecentWindow(
 		image: NSImage? = nil,
-		manualURL: URL? = nil,
 		removeExtension: Bool = true,
 		createNewCallback: (() -> Void)? = nil,
 		selectedFileCallback: ((URL) -> Void)? = nil,
@@ -40,7 +34,6 @@ public struct UMRecentFilesV2 {
 	) {
 		UMOpenRecent.showWindow(
 			image: image,
-			manualURL: manualURL,
 			removeExtension: removeExtension,
 			createNewCallback: createNewCallback,
 			selectedFileCallback: selectedFileCallback,

@@ -6,7 +6,6 @@ Un package Swift moderno per macOS (12.0+) dedicato alla gestione e visualizzazi
 
 - **Design System con `UMUIControls`**: Interfaccia integrata nativamente con `UMUITheme` (supporto scuro/chiaro, token di colore e spaziatura), `UMUITextField` e `UMUIEmptyStateView`.
 - **Anteprime QuickLook Asincrone**: Generazione automatica in background delle miniature reali dei file (`QLThumbnailGenerator`) con cache in memoria `NSCache` e fallback alle icone di sistema.
-- **Manuali Utente & Documentazione Web**: Supporto opzionale per aprire la guida/manuale online dell'app direttamente dall'interfaccia (`manualURL`).
 - **Doppio Layout (Lista e Griglia)**: L'utente o lo sviluppatore può alternare tra una lista ricca (con percorsi abbreviati, dimensioni e date) e una griglia a card visive.
 - **Ricerca Intelligente sul Disco ("Find on Disk")**:
   - Rilevamento automatico delle estensioni supportate dall'applicazione tramite `CFBundleDocumentTypes` in `Info.plist`.
