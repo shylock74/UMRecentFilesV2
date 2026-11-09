@@ -126,6 +126,24 @@ final class UMRecentFilesV2Tests: XCTestCase {
 		XCTAssertEqual(searchResults.first?.url, audioURL)
 	}
 
+	func testRecentFilesViewLayout() {
+		let manager = UMRecentFiles("TestView_\(UUID().uuidString)", sourceMode: .customOnly, maxCount: 10)
+		for i in 1...5 {
+			let fileURL = tempDirectory.appendingPathComponent("Doc\(i).txt")
+			FileManager.default.createFile(atPath: fileURL.path, contents: Data())
+			manager.addFile(url: fileURL)
+		}
+
+		UserDefaults.standard.set(true, forKey: "UMRecentFiles.isOpen")
+		UserDefaults.standard.set(UMRecentFilesViewLayout.list.rawValue, forKey: "UMRecentFiles.layout")
+
+		let view = UMRecentFilesView(manager: manager, callback: nil)
+		let hostingView = NSHostingView(rootView: view)
+		let fitSize = hostingView.fittingSize
+
+		XCTAssertGreaterThan(fitSize.height, 100, "View height should expand when open with items, not collapse to zero")
+	}
+
 	func testAppDocumentTypesResolution() {
 		// Explicit extensions override
 		let explicit = ["mov", "mp4"]

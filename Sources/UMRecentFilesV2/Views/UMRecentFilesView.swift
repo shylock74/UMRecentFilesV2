@@ -36,6 +36,7 @@ public struct UMRecentFilesView: View {
 	@State private var searchText: String = ""
 	@State private var selectedExtension: String? = nil
 	@State private var isTargetedForDrop: Bool = false
+	@State private var measuredContentHeight: CGFloat = 0
 
 	@Environment(\.umuiTheme) private var theme
 
@@ -240,49 +241,86 @@ public struct UMRecentFilesView: View {
 
 	@ViewBuilder
 	private func contentScrollView(items: [UMRecentFile], isDiscovered: Bool) -> some View {
+		let fallbackHeight = estimatedHeight(for: items.count)
+		let effectiveHeight = (measuredContentHeight > 0) ? min(measuredContentHeight, 280.0) : fallbackHeight
+
 		ScrollView {
-			if currentLayout.wrappedValue == .list {
-				LazyVStack(spacing: 2) {
-					ForEach(items) { file in
-						UMRecentFileRowView(
-							file: file,
-							removeExtension: removeExtension,
-							showThumbnail: showThumbnails,
-							onSelect: handleFileSelection,
-							onTogglePin: { manager.togglePin($0) },
-							onRemove: { fileToRemove in
-								if isDiscovered {
-									searchCoordinator.removeDiscoveredFile(fileToRemove)
-								} else {
-									manager.removeRecentFile(fileToRemove)
+			Group {
+				if currentLayout.wrappedValue == .list {
+					VStack(spacing: 2) {
+						ForEach(items) { file in
+							UMRecentFileRowView(
+								file: file,
+								removeExtension: removeExtension,
+								showThumbnail: showThumbnails,
+								onSelect: handleFileSelection,
+								onTogglePin: { manager.togglePin($0) },
+								onRemove: { fileToRemove in
+									if isDiscovered {
+										searchCoordinator.removeDiscoveredFile(fileToRemove)
+									} else {
+										manager.removeRecentFile(fileToRemove)
+									}
 								}
-							}
-						)
+							)
+						}
 					}
-				}
-				.padding(.horizontal, 6)
-			} else {
-				LazyVGrid(columns: [GridItem(.adaptive(minimum: 110), spacing: 6)], spacing: 6) {
-					ForEach(items) { file in
-						UMRecentFileCardView(
-							file: file,
-							removeExtension: removeExtension,
-							onSelect: handleFileSelection,
-							onTogglePin: { manager.togglePin($0) },
-							onRemove: { fileToRemove in
-								if isDiscovered {
-									searchCoordinator.removeDiscoveredFile(fileToRemove)
-								} else {
-									manager.removeRecentFile(fileToRemove)
+					.padding(.horizontal, 6)
+				} else {
+					LazyVGrid(columns: [GridItem(.adaptive(minimum: 110), spacing: 6)], spacing: 6) {
+						ForEach(items) { file in
+							UMRecentFileCardView(
+								file: file,
+								removeExtension: removeExtension,
+								onSelect: handleFileSelection,
+								onTogglePin: { manager.togglePin($0) },
+								onRemove: { fileToRemove in
+									if isDiscovered {
+										searchCoordinator.removeDiscoveredFile(fileToRemove)
+									} else {
+										manager.removeRecentFile(fileToRemove)
+									}
 								}
-							}
-						)
+							)
+						}
 					}
+					.padding(.horizontal, 8)
 				}
-				.padding(.horizontal, 8)
+			}
+			.background(
+				GeometryReader { proxy in
+					Color.clear.preference(
+						key: UMRecentFilesHeightPreferenceKey.self,
+						value: proxy.size.height
+					)
+				}
+			)
+		}
+		.frame(height: max(effectiveHeight, 38.0))
+		.onPreferenceChange(UMRecentFilesHeightPreferenceKey.self) { height in
+			if height > 0 {
+				measuredContentHeight = height
 			}
 		}
-		.frame(maxHeight: 280)
+		.onChange(of: currentLayout.wrappedValue) { _ in
+			measuredContentHeight = 0
+		}
+		.onChange(of: selectedTab) { _ in
+			measuredContentHeight = 0
+		}
+		.onChange(of: items.count) { _ in
+			measuredContentHeight = 0
+		}
+	}
+
+	private func estimatedHeight(for itemsCount: Int) -> CGFloat {
+		guard itemsCount > 0 else { return 0 }
+		if currentLayout.wrappedValue == .list {
+			return min(CGFloat(itemsCount) * 40.0, 280.0)
+		} else {
+			let rows = max(1, (itemsCount + 1) / 2)
+			return min(CGFloat(rows) * 120.0, 280.0)
+		}
 	}
 
 	// MARK: - Action Handlers
@@ -309,4 +347,12 @@ public struct UMRecentFilesView: View {
 		return true
 	}
 }
+
+private struct UMRecentFilesHeightPreferenceKey: PreferenceKey {
+	static var defaultValue: CGFloat = 0
+	static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+		value = max(value, nextValue())
+	}
+}
+
 
