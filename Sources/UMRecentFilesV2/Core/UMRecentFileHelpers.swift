@@ -99,13 +99,46 @@ public extension URL {
 		FileManager.default.fileExists(atPath: self.path)
 	}
 
-	/// Returns file size in bytes if available
+	/// Returns file size in bytes if available.
+	/// For macOS bundles or directories, recursively sums the sizes of all regular files inside.
 	var fileSizeOnDisk: Int64? {
-		guard let attributes = try? FileManager.default.attributesOfItem(atPath: self.path),
-			  let size = attributes[.size] as? NSNumber else {
+		let fileManager = FileManager.default
+		var isDirectory: ObjCBool = false
+		guard fileManager.fileExists(atPath: self.path, isDirectory: &isDirectory) else {
 			return nil
 		}
-		return size.int64Value
+
+		if !isDirectory.boolValue {
+			guard let attributes = try? fileManager.attributesOfItem(atPath: self.path),
+				  let size = attributes[.size] as? NSNumber else {
+				return nil
+			}
+			return size.int64Value
+		}
+
+		let resourceKeys: Set<URLResourceKey> = [.isRegularFileKey, .fileSizeKey, .totalFileAllocatedSizeKey]
+		guard let enumerator = fileManager.enumerator(
+			at: self,
+			includingPropertiesForKeys: Array(resourceKeys),
+			options: [],
+			errorHandler: nil
+		) else {
+			return nil
+		}
+
+		var totalSize: Int64 = 0
+		for case let fileURL as URL in enumerator {
+			guard let values = try? fileURL.resourceValues(forKeys: resourceKeys),
+				  values.isRegularFile == true else {
+				continue
+			}
+			if let fileSize = values.fileSize {
+				totalSize += Int64(fileSize)
+			} else if let allocatedSize = values.totalFileAllocatedSize {
+				totalSize += Int64(allocatedSize)
+			}
+		}
+		return totalSize
 	}
 
 	/// Returns file modification date if available

@@ -51,23 +51,24 @@ public struct UMDiskSearchButton: View {
 				}
 			}
 		} label: {
-			HStack(spacing: 4) {
+			Group {
 				if searchCoordinator.isSearching {
 					ProgressView()
-						.scaleEffect(0.5)
+						.scaleEffect(0.55)
 						.frame(width: 14, height: 14)
 				} else {
 					Image(systemName: "internaldrive")
-						.font(.system(size: 11, weight: .medium))
+						.font(.system(size: 12, weight: .regular))
+						.symbolRenderingMode(.monochrome)
 						.foregroundColor(theme.textSecondary)
 				}
 			}
 			.frame(width: 22, height: 22)
-			.background(theme.surfaceControl)
-			.clipShape(RoundedRectangle(cornerRadius: 4))
+			.contentShape(Rectangle())
 		}
 		.menuStyle(.borderlessButton)
-		.frame(width: 22, height: 22)
+		.menuIndicator(.hidden)
+		.fixedSize()
 		.help("Find compatible documents on disk...")
 	}
 

@@ -170,29 +170,30 @@ public struct UMOpenRecentPanelView: View {
 			VStack(spacing: 10) {
 				// Top search and controls
 				HStack(spacing: 8) {
-					UMUITextField(
+					UMMacSearchField(
 						placeholder: "Search files...",
-						value: $searchText,
-						size: .small,
-						isClearable: true
+						text: $searchText,
+						controlSize: .small
 					)
+					.fixedSize(horizontal: false, vertical: true)
 
 					UMDiskSearchButton(
 						searchCoordinator: searchCoordinator,
 						extensionsToSearch: activeExtensions
 					)
 
-					Button {
-						layout = (layout == .list) ? .grid : .list
-					} label: {
-						Image(systemName: layout == .list ? "square.grid.2x2" : "list.bullet")
-							.font(.system(size: 11))
-							.foregroundColor(theme.textSecondary)
-							.frame(width: 24, height: 24)
-							.background(theme.surfaceControl)
-							.clipShape(RoundedRectangle(cornerRadius: 4))
+					Picker("Layout", selection: $layout) {
+						Image(systemName: "list.bullet")
+							.tag(UMRecentFilesViewLayout.list)
+							.help("List View")
+						Image(systemName: "square.grid.2x2")
+							.tag(UMRecentFilesViewLayout.grid)
+							.help("Grid View")
 					}
-					.buttonStyle(.plain)
+					.pickerStyle(.segmented)
+					.labelsHidden()
+					.controlSize(.small)
+					.fixedSize()
 				}
 				.padding(.horizontal, 14)
 				.padding(.top, 14)

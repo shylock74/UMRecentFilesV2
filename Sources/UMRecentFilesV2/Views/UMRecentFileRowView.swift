@@ -70,7 +70,7 @@ public struct UMRecentFileRowView: View {
 			}
 			.frame(width: 28, height: 28)
 
-			// File Name & Path Details
+			// File Name & Containing Folder
 			VStack(alignment: .leading, spacing: 2) {
 				HStack(spacing: 4) {
 					Text(removeExtension ? file.displayNameWithoutExtension : file.name)
@@ -91,28 +91,17 @@ public struct UMRecentFileRowView: View {
 					}
 				}
 
-				HStack(spacing: 5) {
-					Text(file.abbreviatedPath)
-						.lineLimit(1)
-						.truncationMode(.head)
-
-					if let size = file.formattedFileSize {
-						Text("•")
-						Text(size)
-					}
-
-					if let date = file.formattedModificationDate {
-						Text("•")
-						Text(date)
-					}
-				}
-				.font(theme.captionFont)
-				.foregroundColor(theme.textTertiary)
+				Text(file.parentFolderName.isEmpty ? file.abbreviatedPath : file.parentFolderName)
+					.font(theme.captionFont)
+					.foregroundColor(theme.textTertiary)
+					.lineLimit(1)
+					.truncationMode(.middle)
+					.help(file.abbreviatedPath)
 			}
 
-			Spacer(minLength: 4)
+			Spacer(minLength: 8)
 
-			// Trailing Loading Spinner or Quick Hover Actions
+			// Trailing: Aligned Modification Date & File Size (or Spinner / Hover Actions)
 			if isTapped {
 				ProgressView()
 					.scaleEffect(0.6)
@@ -156,6 +145,24 @@ public struct UMRecentFileRowView: View {
 					.help("Remove from recents")
 				}
 				.transition(.opacity)
+			} else {
+				HStack(spacing: 10) {
+					if let date = file.formattedModificationDate {
+						Text(date)
+							.font(.system(size: 11.5).monospacedDigit())
+							.foregroundColor(theme.textTertiary)
+							.lineLimit(1)
+							.frame(minWidth: 92, alignment: .trailing)
+					}
+
+					if let size = file.formattedFileSize {
+						Text(size)
+							.font(.system(size: 12, weight: .medium).monospacedDigit())
+							.foregroundColor(theme.textSecondary)
+							.lineLimit(1)
+							.frame(minWidth: 58, alignment: .trailing)
+					}
+				}
 			}
 		}
 		.padding(.horizontal, 8)

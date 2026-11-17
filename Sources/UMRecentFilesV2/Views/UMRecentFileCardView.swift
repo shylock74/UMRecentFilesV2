@@ -103,15 +103,19 @@ public struct UMRecentFileCardView: View {
 					.truncationMode(.middle)
 
 				HStack(spacing: 4) {
-					if let size = file.formattedFileSize {
-						Text(size)
-					}
 					if let date = file.formattedModificationDate {
-						Text("•")
 						Text(date)
 					}
+					if file.formattedModificationDate != nil, file.formattedFileSize != nil {
+						Text("•")
+					}
+					if let size = file.formattedFileSize {
+						Text(size)
+							.fontWeight(.medium)
+							.foregroundColor(theme.textSecondary)
+					}
 				}
-				.font(.system(size: 9))
+				.font(.system(size: 10.5).monospacedDigit())
 				.foregroundColor(theme.textTertiary)
 				.lineLimit(1)
 			}

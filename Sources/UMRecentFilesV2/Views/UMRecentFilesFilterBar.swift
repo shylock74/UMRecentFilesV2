@@ -29,14 +29,14 @@ public struct UMRecentFilesFilterBar: View {
 
 	public var body: some View {
 		VStack(spacing: 6) {
-			// Search Input via UMUITextField
+			// Standard macOS Search Field
 			HStack(spacing: 6) {
-				UMUITextField(
+				UMMacSearchField(
 					placeholder: "Search recent files...",
-					value: $searchText,
-					size: .small,
-					isClearable: true
+					text: $searchText,
+					controlSize: .small
 				)
+				.fixedSize(horizontal: false, vertical: true)
 			}
 			.padding(.horizontal, 10)
 

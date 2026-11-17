@@ -88,23 +88,28 @@ public struct UMRecentFilesHeaderView: View {
 
 			// Contextual controls visible when open
 			if isOpen {
-				HStack(spacing: 4) {
-					// Layout Toggle Button
+				HStack(spacing: 6) {
+					// Layout Segmented Control
 					if allowLayoutSwitch {
-						Button {
-							withAnimation(.easeInOut(duration: 0.15)) {
-								layout = (layout == .list) ? .grid : .list
+						Picker("Layout", selection: Binding(
+							get: { layout },
+							set: { newValue in
+								withAnimation(.easeInOut(duration: 0.15)) {
+									layout = newValue
+								}
 							}
-						} label: {
-							Image(systemName: layout == .list ? "square.grid.2x2" : "list.bullet")
-								.font(.system(size: 11, weight: .medium))
-								.foregroundColor(theme.textSecondary)
-								.frame(width: 22, height: 22)
-								.background(theme.surfaceControl)
-								.clipShape(RoundedRectangle(cornerRadius: 4))
+						)) {
+							Image(systemName: "list.bullet")
+								.tag(UMRecentFilesViewLayout.list)
+								.help("List View")
+							Image(systemName: "square.grid.2x2")
+								.tag(UMRecentFilesViewLayout.grid)
+								.help("Grid View")
 						}
-						.buttonStyle(.plain)
-						.help(layout == .list ? "Switch to Grid View" : "Switch to List View")
+						.pickerStyle(.segmented)
+						.labelsHidden()
+						.controlSize(.small)
+						.fixedSize()
 					}
 
 					// Sorting and Actions Menu
@@ -133,14 +138,15 @@ public struct UMRecentFilesHeaderView: View {
 							}
 						} label: {
 							Image(systemName: "arrow.up.arrow.down")
-								.font(.system(size: 11, weight: .medium))
+								.font(.system(size: 12, weight: .regular))
+								.symbolRenderingMode(.monochrome)
 								.foregroundColor(theme.textSecondary)
 								.frame(width: 22, height: 22)
-								.background(theme.surfaceControl)
-								.clipShape(RoundedRectangle(cornerRadius: 4))
+								.contentShape(Rectangle())
 						}
 						.menuStyle(.borderlessButton)
-						.frame(width: 22, height: 22)
+						.menuIndicator(.hidden)
+						.fixedSize()
 						.help("Sort options")
 					}
 

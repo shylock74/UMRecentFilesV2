@@ -202,4 +202,18 @@ final class UMRecentFilesV2Tests: XCTestCase {
 
 		wait(for: [expectation], timeout: 2.0)
 	}
+
+	func testBundleTotalFileSizeCalculation() throws {
+		let bundleURL = tempDirectory.appendingPathComponent("Project.story")
+		let subDirURL = bundleURL.appendingPathComponent("Assets")
+		try FileManager.default.createDirectory(at: subDirURL, withIntermediateDirectories: true)
+
+		let data1 = Data(repeating: 0x41, count: 1024)
+		let data2 = Data(repeating: 0x42, count: 2048)
+		try data1.write(to: bundleURL.appendingPathComponent("document.json"))
+		try data2.write(to: subDirURL.appendingPathComponent("clip.bin"))
+
+		let recentFile = UMRecentFile(url: bundleURL)
+		XCTAssertEqual(recentFile.fileSize, 3072)
+	}
 }
